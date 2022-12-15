@@ -7,7 +7,7 @@ pygame.init()
 screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 timer = pygame.time.Clock()
 
-lib=ctypes.CDLL('python/DLL.dll')
+lib=ctypes.CDLL('DLL/x64/Debug/DLL.dll')
 lib.generator()
 
 
