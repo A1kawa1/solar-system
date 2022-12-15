@@ -93,30 +93,16 @@ void check_crush(Star s1, Star s2) {
     double distance = sqrt(pow(s1.xCord - s2.xCord, 2) + pow(s1.yCord - s2.yCord, 2));
     if (distance < s1.radius + s2.radius) {
         if (s1.color == "yellow") {
-            /*Star key = s2;
-            Star sun = s1;
-
-            std::vector<Star>::iterator itr = std::find(stars.begin(), stars.end(), key);
-            int id_del = std::distance(stars.begin(), itr);
-
-            std::vector<Star>::iterator itr_sun = std::find(stars.begin(), stars.end(), sun);
-            int id_sun = std::distance(stars.begin(), itr_sun);*/
 
             stars[id1].mass += key1.mass;
             stars[id2].mass = 0;
+
         }
         else if (s2.color == "yellow") {
-            /*Star key = s1;
-            Star sun = s2;
-
-            std::vector<Star>::iterator itr = std::find(stars.begin(), stars.end(), key);
-            int id_del = std::distance(stars.begin(), itr);
-
-            std::vector<Star>::iterator itr_sun = std::find(stars.begin(), stars.end(), sun);
-            int id_sun = std::distance(stars.begin(), itr_sun);*/
 
             stars[id2].mass += key2.mass;
             stars[id1].mass = 0;
+
         }
         else {
             float Vx = (s1.mass * s1.xSpeed + s2.mass * s2.xSpeed) / (s1.mass + s2.mass);
@@ -124,31 +110,14 @@ void check_crush(Star s1, Star s2) {
 
             if (s1.mass >= s2.mass) {
 
-                /*Star key = s1;
-                Star del = s2;
-
-                std::vector<Star>::iterator itr = std::find(stars.begin(), stars.end(), key);
-                int id = std::distance(stars.begin(), itr);
-
-                std::vector<Star>::iterator itr_del = std::find(stars.begin(), stars.end(), del);
-                int id_del = std::distance(stars.begin(), itr_del);*/
-
                 stars[id1].mass += stars[id2].mass;
                 stars[id1].xSpeed = Vx;
                 stars[id1].ySpeed = Vy;
 
                 stars[id2].mass = 0;
+
             }
             else {
-
-                /*Star key = s2;
-                Star del = s1;
-
-                std::vector<Star>::iterator itr = std::find(stars.begin(), stars.end(), key);
-                int id = std::distance(stars.begin(), itr);
-
-                std::vector<Star>::iterator itr_del = std::find(stars.begin(), stars.end(), del);
-                int id_del = std::distance(stars.begin(), itr_del);*/
 
                 stars[id2].mass += stars[id1].mass;
                 stars[id2].xSpeed = Vx;
@@ -220,15 +189,20 @@ extern "C" __declspec(dllexport) void dll() {
             check_crush(stars[i], stars[j]);
         }
     }
+    for (int i = size(stars)-1; i >= 0; i--) {
+        if (stars[i].mass == 0) {
+            stars.erase(next(stars.begin()) - 1 + i);
+        }
+    }
     ofstream out;
     out.open("python/data.txt");
     for (int i = 0; i < size(stars); i++) {
         if (stars[i].color != "yellow") {
             stars[i].changePosition();
         }
-        if (stars[i].mass != 0) {
+        //if (stars[i].mass != 0) {
             out << stars[i].xCord << ' ' << stars[i].yCord << ' ' << stars[i].radius << ' ' << stars[i].mass << ' ' << stars[i].color << endl;
-        }  
+        //}  
     }
     out.close();
 }
