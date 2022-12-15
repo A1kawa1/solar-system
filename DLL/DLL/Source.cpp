@@ -7,12 +7,13 @@
 #include <windows.h>
 using namespace std;
 
-const double sunRadius = 20;
+const double sunRadius = 30;
 const double sunMass = 500;
 const int X0 = GetSystemMetrics(SM_CXSCREEN) / 2;
 const int Y0 = GetSystemMetrics(SM_CYSCREEN) /2;
 const double g = 0.1;
 const double mass_to_radius = sunRadius / (sunMass * 2);
+const int default_num_stars = 100;
 
 class Star {
 public:
@@ -67,26 +68,6 @@ public:
             return false;
         }
     }
-    friend Star operator+ (Star s1, Star s2) {
-        double newXSpeed = (s1.mass * s1.xSpeed + s2.mass * s2.xSpeed) / (s1.mass + s2.mass);
-        double newYSpeed = (s1.mass * s1.ySpeed + s2.mass * s2.ySpeed) / (s1.mass + s2.mass);
-        if (s1.radius >= s2.radius) {
-            s1.radius += s2.radius;
-            s1.mass += s2.mass;
-            s1.xSpeed = newXSpeed;
-            s1.ySpeed = newYSpeed;
-            s2.radius = -1;
-            return s1;
-        }
-        else {
-            s2.radius += s1.radius;
-            s2.mass += s1.mass;
-            s2.xSpeed = newXSpeed;
-            s2.ySpeed = newYSpeed;
-            s1.radius = -1;
-            return s2;
-        }
-    }
 };
 double GetRandomNum(double min, double max, int precision)
 {
@@ -101,33 +82,26 @@ void check_crush(Star s1, Star s2) {
     if ((s1.mass == 0) || (s2.mass == 0)) {
         return;
     }
+    Star key1 = s1;
+    Star key2 = s2;
+
+    vector<Star>::iterator itr1 = find(stars.begin(), stars.end(), key1);
+    int id1 = std::distance(stars.begin(), itr1);
+
+    vector<Star>::iterator itr2 = find(stars.begin(), stars.end(), key2);
+    int id2 = std::distance(stars.begin(), itr2);
+
     double distance = sqrt(pow(s1.xCord - s2.xCord, 2) + pow(s1.yCord - s2.yCord, 2));
     if (distance < s1.radius + s2.radius) {
         if (s1.color == "yellow") {
-            Star key = s2;
-            Star sun = s1;
 
-            std::vector<Star>::iterator itr = std::find(stars.begin(), stars.end(), key);
-            int id_del = std::distance(stars.begin(), itr);
-
-            std::vector<Star>::iterator itr_sun = std::find(stars.begin(), stars.end(), sun);
-            int id_sun = std::distance(stars.begin(), itr_sun);
-
-            stars[id_sun].mass += key.mass;
-            stars[id_del].mass = 0;
+            stars[id1].mass += key1.mass;
+            stars[id2].mass = 0;
         }
         else if (s2.color == "yellow") {
-            Star key = s1;
-            Star sun = s2;
 
-            std::vector<Star>::iterator itr = std::find(stars.begin(), stars.end(), key);
-            int id_del = std::distance(stars.begin(), itr);
-
-            std::vector<Star>::iterator itr_sun = std::find(stars.begin(), stars.end(), sun);
-            int id_sun = std::distance(stars.begin(), itr_sun);
-
-            stars[id_sun].mass += key.mass;
-            stars[id_del].mass = 0;
+            stars[id2].mass += key2.mass;
+            stars[id1].mass = 0;
         }
         else {
             float Vx = (s1.mass * s1.xSpeed + s2.mass * s2.xSpeed) / (s1.mass + s2.mass);
@@ -135,39 +109,33 @@ void check_crush(Star s1, Star s2) {
 
             if (s1.mass >= s2.mass) {
 
-                Star key = s1;
-                Star del = s2;
+                stars[id1].mass += stars[id2].mass;
+                stars[id1].xSpeed = Vx;
+                stars[id1].ySpeed = Vy;
 
-                std::vector<Star>::iterator itr = std::find(stars.begin(), stars.end(), key);
-                int id = std::distance(stars.begin(), itr);
-
-                std::vector<Star>::iterator itr_del = std::find(stars.begin(), stars.end(), del);
-                int id_del = std::distance(stars.begin(), itr_del);
-
-                stars[id].mass += stars[id_del].mass;
-                stars[id].xSpeed = Vx;
-                stars[id].ySpeed = Vy;
-
-                stars[id_del].mass = 0;
+                stars[id2].mass = 0;
             }
             else {
 
-                Star key = s2;
-                Star del = s1;
+                stars[id2].mass += stars[id1].mass;
+                stars[id2].xSpeed = Vx;
+                stars[id2].ySpeed = Vy;
 
-                std::vector<Star>::iterator itr = std::find(stars.begin(), stars.end(), key);
-                int id = std::distance(stars.begin(), itr);
-
-                std::vector<Star>::iterator itr_del = std::find(stars.begin(), stars.end(), del);
-                int id_del = std::distance(stars.begin(), itr_del);
-
-                stars[id].mass += stars[id_del].mass;
-                stars[id].xSpeed = Vx;
-                stars[id].ySpeed = Vy;
-
-                stars[id_del].mass = 0;
+                stars[id1].mass = 0;
 
             }
+        }
+    }
+    else {
+        if ((s1.color != "yellow") && (s2.color != "yellow")) {
+            double fx = g * stars[id1].mass * stars[id2].mass * (stars[id2].xCord - stars[id1].xCord) / pow(distance, 3);
+            double fy = g * stars[id1].mass * stars[id2].mass * (stars[id2].yCord - stars[id1].yCord) / pow(distance, 3);
+            stars[id1].xAccel = fx / stars[id1].mass;
+            stars[id1].yAccel = fy / stars[id1].mass;
+
+            stars[id1].xSpeed += stars[id1].xAccel;
+            stars[id1].ySpeed += stars[id1].yAccel;
+
         }
     }
 }
@@ -175,7 +143,7 @@ void check_crush(Star s1, Star s2) {
 
 extern "C" __declspec(dllexport) void generator() {
     srand(time(NULL));
-    int count = 100;
+    int count;
     string line;
     ifstream in;
     in.open("python/data.txt");
@@ -184,18 +152,25 @@ extern "C" __declspec(dllexport) void generator() {
     }
     else {
         in >> line;
-        count = stoi(line);
+        try
+        {
+            count = stoi(line);
+        }
+        catch (const exception&)
+        {
+            count = default_num_stars;
+        }
         cout << count;
     }
     in.close();
     for (int i = 0; i < count; i++) {
         double x = GetRandomNum(10, 1920, 2);
         double y = GetRandomNum(10, 1080, 2);
-        double vx = GetRandomNum(0.1, 0.5, 2);
-        double vy = GetRandomNum(0.1, 0.5, 2);
+        double vx = GetRandomNum(-0.5, 0.5, 2);
+        double vy = GetRandomNum(-0.5, 0.5, 2);
         double ax = 0;
         double ay = 0;
-        double starMass = GetRandomNum(50, 200, 2);
+        double starMass = GetRandomNum(20, 60, 2);
         stars.push_back(Star(
             x, y, vx, vy, ax, ay, starMass, "white"
         ));
@@ -224,5 +199,3 @@ extern "C" __declspec(dllexport) void dll() {
     }
     out.close();
 }
-
-
