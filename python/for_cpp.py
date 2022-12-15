@@ -65,19 +65,33 @@ def check_crush(stars, self, other):
             Vx = (self.mass * self.vx + other.mass * other.vx) / (self.mass + other.mass)
             Vy = (self.mass * self.vy + other.mass * other.vy) / (self.mass + other.mass)
             if self.mass >= other.mass:
-                self.radius += other.radius
-                self.mass += other.mass
-                self.vx = Vx
-                self.vy = Vy
+                id = stars.index(self)
+                stars[id].radius += other.radius
+                stars[id].mass += other.mass
+                stars[id].vx = Vx
+                stars[id].vy = Vy
                 id_del = stars.index(other)
                 stars[id_del] = None
             else:
-                other.radius += self.radius
-                other.mass += self.mass
-                other.vx = Vx
-                other.vy = Vy
+                id = stars.index(other)
+                stars[id].radius += self.radius
+                stars[id].mass += self.mass
+                stars[id].vx = Vx
+                stars[id].vy = Vy
                 id_del = stars.index(self)
                 stars[id_del] = None
+    else:
+        if self != sun and other != sun:
+            Fx = self.G * self.mass * other.mass * (other.x - self.x) / distance**3
+            Fy = self.G * self.mass * other.mass * (other.y - self.y) / distance**3
+            id1 = stars.index(self)
+            id2 = stars.index(other)
+            stars[id1].ax = Fx / stars[id1].mass
+            stars[id1].ay = Fy / stars[id1].mass
+
+            stars[id1].vx += stars[id1].ax
+            stars[id1].vy += stars[id1].ay
+
 
 
 stars = [
@@ -91,7 +105,7 @@ stars = [
         vy=random.uniform(0.1, 0.5),
         ax=0,
         ay=0.0
-    ) for _ in range(256)
+    ) for _ in range(50)
 ]
 
 sun = Star(

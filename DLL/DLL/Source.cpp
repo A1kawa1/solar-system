@@ -200,9 +200,7 @@ extern "C" __declspec(dllexport) void dll() {
         if (stars[i].color != "yellow") {
             stars[i].changePosition();
         }
-        //if (stars[i].mass != 0) {
-            out << stars[i].xCord << ' ' << stars[i].yCord << ' ' << stars[i].radius << ' ' << stars[i].mass << ' ' << stars[i].color << endl;
-        //}  
+        out << stars[i].xCord << ' ' << stars[i].yCord << ' ' << stars[i].radius << ' ' << stars[i].mass << ' ' << stars[i].color << endl;
     }
     out.close();
 }
