@@ -91,7 +91,7 @@ stars = [
         vy=random.uniform(0.1, 0.5),
         ax=0,
         ay=0.0
-    ) for _ in range(256)
+    ) for _ in range(200)
 ]
 
 sun = Star(

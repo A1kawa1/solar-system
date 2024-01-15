@@ -12,7 +12,7 @@ const double sunMass = 500;
 const int X0 = GetSystemMetrics(SM_CXSCREEN) / 2;
 const int Y0 = GetSystemMetrics(SM_CYSCREEN) /2;
 const double g = 0.1;
-const double mass_to_radius = sunRadius / (sunMass * 2);
+const double mass_to_radius = sunRadius / (sunMass * 1.5);
 const int default_num_stars = 100;
 
 class Star {
