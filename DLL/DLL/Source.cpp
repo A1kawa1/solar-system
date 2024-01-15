@@ -97,11 +97,19 @@ void check_crush(Star s1, Star s2) {
 
             stars[id1].mass += key1.mass;
             stars[id2].mass = 0;
+<<<<<<< HEAD
+=======
+
+>>>>>>> d7645c92a94da48d434a5ec42244444c2d20ebf2
         }
         else if (s2.color == "yellow") {
 
             stars[id2].mass += key2.mass;
             stars[id1].mass = 0;
+<<<<<<< HEAD
+=======
+
+>>>>>>> d7645c92a94da48d434a5ec42244444c2d20ebf2
         }
         else {
             float Vx = (s1.mass * s1.xSpeed + s2.mass * s2.xSpeed) / (s1.mass + s2.mass);
@@ -114,6 +122,10 @@ void check_crush(Star s1, Star s2) {
                 stars[id1].ySpeed = Vy;
 
                 stars[id2].mass = 0;
+<<<<<<< HEAD
+=======
+
+>>>>>>> d7645c92a94da48d434a5ec42244444c2d20ebf2
             }
             else {
 
@@ -158,7 +170,11 @@ extern "C" __declspec(dllexport) void generator() {
         }
         catch (const exception&)
         {
+<<<<<<< HEAD
             count = default_num_stars;
+=======
+            count = 100;
+>>>>>>> d7645c92a94da48d434a5ec42244444c2d20ebf2
         }
         cout << count;
     }
@@ -187,15 +203,18 @@ extern "C" __declspec(dllexport) void dll() {
             check_crush(stars[i], stars[j]);
         }
     }
+    for (int i = size(stars)-1; i >= 0; i--) {
+        if (stars[i].mass == 0) {
+            stars.erase(next(stars.begin()) - 1 + i);
+        }
+    }
     ofstream out;
     out.open("python/data.txt");
     for (int i = 0; i < size(stars); i++) {
         if (stars[i].color != "yellow") {
             stars[i].changePosition();
         }
-        if (stars[i].mass != 0) {
-            out << stars[i].xCord << ' ' << stars[i].yCord << ' ' << stars[i].radius << ' ' << stars[i].mass << ' ' << stars[i].color << endl;
-        }  
+        out << stars[i].xCord << ' ' << stars[i].yCord << ' ' << stars[i].radius << ' ' << stars[i].mass << ' ' << stars[i].color << endl;
     }
     out.close();
 }
